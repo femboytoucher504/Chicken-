@@ -1,8 +1,0 @@
-{
-  "name": "ChickenSpammer",
-  "description": "Spams random chick and chicken pictures into the chat. Add your own custom sources in settings!",
-  "author": "femboytoucher504",
-  "main": "index.js",
-  "hash": "1d3682c127b8f8f3f52f07b92cdc557be9ec05ee78378d2f765ecafda4c92bac",
-  "version": "1.0.3"
-}
