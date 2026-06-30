@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'index.js'
 
 permissions:
   contents: write
@@ -17,21 +15,27 @@ jobs:
       - name: Checkout Repository Code
         uses: actions/checkout@v4
 
-      - name: Calculate Hash and Inject into Manifest
+      - name: Calculate and Force Inject Hash
         run: |
-          FILE_HASH=$(sha256sum index.js | awk '{print $1}')
-          echo "Generated SHA-256: $FILE_HASH"
+          CALC_HASH=$(sha256sum index.js | awk '{print $1}')
+          echo "Generated SHA-256: $CALC_HASH"
           
-          python3 -c "
-          import json
-          with open('manifest.json', 'r') as file:
-              data = json.load(file)
-          data['hash'] = '$FILE_HASH'
-          if 'vendetta' in data:
-              data['vendetta']['hash'] = '$FILE_HASH'
-          with open('manifest.json', 'w') as file:
-              json.dump(data, file, indent=2)
-          "
+          # Using environment variables to keep Python immune to shell quote breaking
+          export CALC_HASH
+          
+          python3 -c '
+          import os, re
+          target_hash = os.environ.get("CALC_HASH")
+          
+          with open("manifest.json", "r", encoding="utf-8") as f:
+              content = f.read()
+          
+          # Forcefully overwrites any hash strings regardless of JSON formatting quirks
+          updated_content = re.sub(r"\"hash\"\s*:\s*\"[^\"]*\"", f"\"hash\": \"{target_hash}\"", content)
+          
+          with open("manifest.json", "w", encoding="utf-8") as f:
+              f.write(updated_content)
+          '
 
       - name: Commit Updated Hash Changes
         uses: stefanzweifel/git-auto-commit-action@v5
