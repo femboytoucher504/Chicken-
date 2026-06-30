@@ -9,9 +9,9 @@
   ],
   "main": "dist.js",
   "version": "1.0.1",
-  "hash": "0bab5f0aa70d1c2a748cdca85688789cda0e5e5bf234bdcb90e601a9c4cb19bf",
+  "hash": "d976bf7ca95c73765906f187bd9666bf0ec66d2286adfd49bfa8cbfa4649d5f3",
   "vendetta": {
     "icon": "ic_pets",
-    "hash": "0bab5f0aa70d1c2a748cdca85688789cda0e5e5bf234bdcb90e601a9c4cb19bf"
+    "hash": "d976bf7ca95c73765906f187bd9666bf0ec66d2286adfd49bfa8cbfa4649d5f3"
   }
 }
