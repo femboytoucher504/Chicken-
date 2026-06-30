@@ -1,17 +1,12 @@
 {
   "name": "Chickenizer",
   "description": "Sends random chicken/chick pictures via /chick, with /chick-add to add new sources, /chick-list and /chick-remove to manage them.",
-  "authors": [
-    {
-      "name": "you",
-      "id": "0"
-    }
-  ],
-  "main": "dist.js",
+  "authors": [{ "name": "you", "id": "0" }],
+  "main": "index.js",
   "version": "1.0.1",
-  "hash": "baebae76c3610d306ee603e12d480a58a059553d789a00e3a9c4884fa3b45f0b",
+  "hash": "PENDING",
   "vendetta": {
     "icon": "ic_pets",
-    "hash": "baebae76c3610d306ee603e12d480a58a059553d789a00e3a9c4884fa3b45f0b"
+    "hash": "PENDING"
   }
 }
