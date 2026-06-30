@@ -1,9 +1,9 @@
 {
   "name": "ChickenSpammer",
   "description": "Spams random chick and chicken pictures into the chat. Add your own custom sources in settings!",
-  "author": "YourGitHubUsername",
+  "author": "femboytoucher504",
   "main": "index.ts",
   "hash": "f0dc66e75b5d5a6ca7761fe6a31c1d7632d15ee1e098661570e8ecf99e67d423",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
 
