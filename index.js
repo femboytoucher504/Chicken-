@@ -1,20 +1,36 @@
-import { commands } from "@vendetta/commands";
-import { storage } from "@vendetta/plugin";
-
 const DEFAULT_SOURCES = [
   "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80",
   "https://images.unsplash.com/photo-1604848698030-c434ba08ece1?auto=format&fit=crop&w=800&q=80",
   "https://images.unsplash.com/photo-1587573089734-09cb6b4eb18b?auto=format&fit=crop&w=800&q=80"
 ];
 
+// Dynamically fetch Discord's high-performance native storage database
+const getStorage = () => {
+  return vendetta.metro.findByProps("getString", "setString");
+};
+
+const getSources = () => {
+  try {
+    const db = getStorage();
+    const stored = db ? db.getString("chickenizer_sources") : null;
+    return stored ? JSON.parse(stored) : [...DEFAULT_SOURCES];
+  } catch {
+    return [...DEFAULT_SOURCES];
+  }
+};
+
+const saveSources = (sources) => {
+  try {
+    const db = getStorage();
+    if (db) db.setString("chickenizer_sources", JSON.stringify(sources));
+  } catch (e) {}
+};
+
 let patches = [];
 
 export default {
   onLoad: () => {
-    // Sync default sources into storage if empty
-    if (!storage.sources || storage.sources.length === 0) {
-      storage.sources = [...DEFAULT_SOURCES];
-    }
+    const { commands } = vendetta;
 
     // 1. /chick - Sends a random picture
     patches.push(
@@ -23,7 +39,7 @@ export default {
         description: "Sends a random chicken or chick picture",
         options: [],
         execute: (args, ctx) => {
-          const srcs = storage.sources.length > 0 ? storage.sources : DEFAULT_SOURCES;
+          const srcs = getSources();
           const randomPic = srcs[Math.floor(Math.random() * srcs.length)];
           return { content: randomPic };
         },
@@ -39,39 +55,42 @@ export default {
           {
             name: "url",
             description: "The direct link to the image",
-            type: 3, // String type
+            type: 3, // String
             required: true,
           },
         ],
         execute: (args, ctx) => {
           const urlOption = args.find((arg) => arg.name === "url");
           if (!urlOption || !urlOption.value.startsWith("http")) {
-            return { content: "❌ Please provide a valid web URL starting with http or https." };
+            return { content: "❌ Please provide a valid web URL." };
           }
           
           const targetUrl = urlOption.value.trim();
-          if (storage.sources.includes(targetUrl)) {
+          const srcs = getSources();
+          if (srcs.includes(targetUrl)) {
             return { content: "⚠️ This source link is already saved." };
           }
 
-          storage.sources.push(targetUrl);
-          return { content: `✅ Added new source successfully!` };
+          srcs.push(targetUrl);
+          saveSources(srcs);
+          return { content: "✅ Added new source successfully!" };
         },
       })
     );
 
-    // 3. /chick-list - Lists current configuration entries
+    // 3. /chick-list - Lists current sources
     patches.push(
       commands.registerCommand({
         name: "chick-list",
         description: "List all active chicken picture sources",
         options: [],
         execute: (args, ctx) => {
-          if (storage.sources.length === 0) {
+          const srcs = getSources();
+          if (srcs.length === 0) {
             return { content: "🐔 No image sources are currently loaded." };
           }
           
-          const visibleList = storage.sources
+          const visibleList = srcs
             .map((src, index) => `**${index + 1}.** ${src}`)
             .join("\n");
             
@@ -80,7 +99,7 @@ export default {
       })
     );
 
-    // 4. /chick-remove - Deletes an entry by index number
+    // 4. /chick-remove - Deletes an entry by its index number
     patches.push(
       commands.registerCommand({
         name: "chick-remove",
@@ -89,7 +108,7 @@ export default {
           {
             name: "index",
             description: "The number of the source to delete",
-            type: 4, // Integer type
+            type: 4, // Integer
             required: true,
           },
         ],
@@ -98,12 +117,14 @@ export default {
           if (!indexOption) return { content: "❌ Specify an item number to clear." };
 
           const itemIndex = parseInt(indexOption.value) - 1;
-          if (itemIndex >= 0 && itemIndex < storage.sources.length) {
-            const deletedItem = storage.sources.splice(itemIndex, 1);
+          const srcs = getSources();
+          if (itemIndex >= 0 && itemIndex < srcs.length) {
+            const deletedItem = srcs.splice(itemIndex, 1);
+            saveSources(srcs);
             return { content: `🗑️ Successfully removed source entry: <${deletedItem[0]}>` };
           }
 
-          return { content: "❌ Invalid item number. Check your positions via `/chick-list` first." };
+          return { content: "❌ Invalid item number. Check positions via `/chick-list` first." };
         },
       })
     );
@@ -112,5 +133,4 @@ export default {
   onUnload: () => {
     for (const unpatch of patches) unpatch();
   },
-}; 
- 
+};
