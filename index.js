@@ -52,16 +52,16 @@ var defaultSources = [
 
 var _unregisters = [];
 
-// Command factory that constructs a perfectly compliant Discord Mobile slash command
+// Clean command factory matching native Discord mobile structures
 function createChickenCommand(commandName) {
     return {
-        id: "chicken-spammer-" + commandName, // Explicit unique ID stops the UI from hiding the command
+        id: "chicken-spammer-" + commandName, // Unique rendering ID ensures it displays in the menu list
         name: commandName,
         displayName: commandName,
         description: "Send a random chicken or chick picture!",
         displayDescription: "Send a random chicken or chick picture!",
-        inputType: 1, // Treat as a built-in text execution chip
-        type: 1,      // Chat command type
+        inputType: 1, // Flags as native input text integration
+        type: 1,      // Chat/Text command type
         options: [],
         execute: function (args, ctx) {
             try {
@@ -70,7 +70,7 @@ function createChickenCommand(commandName) {
                 var randomSource = sources[Math.floor(Math.random() * sources.length)];
                 var isApi = randomSource.indexOf("/api") !== -1 || randomSource.slice(-5) === ".json";
 
-                // Return the target object or Promise directly so the chatbox intercepts it natively
+                // Directly return the expected object or Promise to match native text chip pipelines
                 if (isApi) {
                     return fetch(randomSource)
                         .then(function (r) { return r.json(); })
@@ -79,7 +79,7 @@ function createChickenCommand(commandName) {
                             return { content: url };
                         })
                         .catch(function (err) {
-                            return { content: "Failed to fetch chicken image: " + err.message };
+                            return { content: "Failed to fetch image: " + err.message };
                         });
                 } else {
                     return { content: randomSource };
@@ -96,21 +96,20 @@ function onLoad() {
         _storage.sources = defaultSources.slice();
     }
 
-    if (!_registerCommand) { 
-        if (_showToast) _showToast("ChickenSpammer: Registry module missing!", null);
-        return; 
-    }
+    if (!_registerCommand) { return; }
 
     try {
-        // Safe parallel registration for both commands
+        // Safe dynamic injection for both variations
         _unregisters.push(_registerCommand(createChickenCommand("chicken")));
         _unregisters.push(_registerCommand(createChickenCommand("chick")));
 
         if (_showToast) {
-            _showToast("ChickenSpammer: /chicken and /chick commands online!", null);
+            try { _showToast("ChickenSpammer: Commands online!", null); } catch(e) {}
         }
     } catch (e) {
-        if (_showToast) _showToast("ChickenSpammer failed to inject commands: " + e.message, null);
+        if (_showToast) {
+            try { _showToast("ChickenSpammer Error: " + e.message, null); } catch(err) {}
+        }
     }
 }
 
@@ -195,5 +194,4 @@ function SettingsComponent() {
 
 if (typeof module !== "undefined") {
     module.exports = { onLoad: onLoad, onUnload: onUnload, settings: SettingsComponent };
-        }
-                
+}
